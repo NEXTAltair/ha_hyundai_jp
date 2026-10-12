@@ -1,0 +1,11 @@
+{
+  "description": "Python の共有環境を保護する",
+  "blocked_commands": [
+    {
+      "pattern": "uv\\s+run\\b[^\\n]*--active\\b",
+      "reason": "共有 venv と異なる環境への同期を防ぐため --active は使わない",
+      "suggestion": "UV_PROJECT_ENVIRONMENT を設定した環境で uv run を使う"
+    }
+  ],
+  "worktree_uv_guard": true
+}

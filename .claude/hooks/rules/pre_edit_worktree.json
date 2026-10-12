@@ -1,0 +1,4 @@
+{
+  "description": "Home Assistant 統合のコードも専用 worktree で編集する",
+  "protected_dirs": ["custom_components"]
+}

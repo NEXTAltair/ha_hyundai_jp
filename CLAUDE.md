@@ -4,6 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 プロジェクト方針（対象車種、識別子の新規設計、Context7 の使い方）は `AGENTS.md`、前セッションの状態と未決事項は `active_context.md` にある。作業前に両方を読む。この文書ではそれらを繰り返さない。
 
+開発手順には `altairs-agent-dev-kit v0.6.0` を使う。適用範囲・復元・検証方法は
+`AGENTS.md` の Agent development kit 節、共通規約は `.claude/rules/` を参照する。
+
 ## リポジトリの現状
 
 - アプリケーションコードはまだない。新しい domain 文字列も未確定。

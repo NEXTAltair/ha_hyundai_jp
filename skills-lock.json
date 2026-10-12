@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "skills": {
+    "check-existing": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/check-existing/SKILL.md",
+      "computedHash": "a4354295942a3f959bcecbb2004afb7dd3ec706ada26acf6677fc42932c5cb67"
+    },
+    "docs-freshness-audit": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/docs-freshness-audit/SKILL.md",
+      "computedHash": "23ff4ec85a0284152a4ce76dcbd5a019ffc63a5b595af52032dbb709589a0eba"
+    },
+    "goal-prompt-crafter": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/goal-prompt-crafter/SKILL.md",
+      "computedHash": "c7ccb3d46003b74a400dc1e22afabf20cd441579911131e927ce62b1fc6febdc"
+    },
+    "interface-design": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/interface-design/SKILL.md",
+      "computedHash": "2d4afa930efe07419bf71f1cab25676b746a24806b284cc07101146b54489535"
+    },
+    "lazy-import-refactor": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/lazy-import-refactor/SKILL.md",
+      "computedHash": "f9046376071d9e41bd7bc5ac75505a6b9dc23bf9ff2a9e667752c446fe88c91b"
+    },
+    "okf-bundle": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/okf-bundle/SKILL.md",
+      "computedHash": "1af0c65e5c5912a85901da841ecb6d13846230d447987d439ad00c0df27378f7"
+    },
+    "pr-autoloop": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/pr-autoloop/SKILL.md",
+      "computedHash": "efdb06c9fff9df0ca984515528302ec4d8e0512659ff626720e67ad18e19aa4a"
+    },
+    "pr-maintainer": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/pr-maintainer/SKILL.md",
+      "computedHash": "1f137fff06ec2dcb1499f4df08c04a5177379e7d8a14b261c2d433c92384f14f"
+    },
+    "prompt-optimizer": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/prompt-optimizer/SKILL.md",
+      "computedHash": "ec4d290150113dbaa967d9d9b9c0b698b16cc0eb7aa10dcabc3f8324eef0caa3"
+    },
+    "pytest-qt-bdd": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/pytest-qt-bdd/SKILL.md",
+      "computedHash": "b644ec5c84f0efbc3e1cbac69e3494c20c53d4b57284bf2c041ff3220ee77961"
+    },
+    "qa-expert": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/qa-expert/SKILL.md",
+      "computedHash": "2ddce96b514eeaa43063c5425416c9ab7de3f22d3aeb6321b3c3689d9b6a254c"
+    },
+    "skill-creator": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/skill-creator/SKILL.md",
+      "computedHash": "13327abfd367602a6cc8a622f49fdc6a673a770be80abe8a9cfb0b0e1ded63a9"
+    },
+    "sqlalchemy-query-patterns": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/sqlalchemy-query-patterns/SKILL.md",
+      "computedHash": "5bce8d602a2c162f5f3975149067ad57e4f80a31247a645562fac6030012da98"
+    },
+    "worktree-workflow": {
+      "source": "NEXTAltair/altairs-agent-dev-kit",
+      "ref": "v0.6.0",
+      "sourceType": "github",
+      "skillPath": "skills/worktree-workflow/SKILL.md",
+      "computedHash": "8d2ff4d843ff4d5ef5063c59e83935f200c91cc5b7fe2129cce5c8b020f21234"
+    }
+  }
+}

@@ -26,3 +26,19 @@ Thumbs.db
 
 # Local session handoff (local paths and investigation notes)
 active_context.md
+
+# Agent development kit: restored from tracked lock files
+.agent-kit/runtimes/
+.agent-kit/.pin-update
+.agents/skills/
+.claude/skills/
+
+# Agent worktrees, logs and machine-specific settings
+.agents/worktree/
+.claude/logs/
+.codex/config.toml
+.codex/logs/
+
+# Installer proposals to review locally
+.codex/config.toml.new
+.codex/hooks.json.new

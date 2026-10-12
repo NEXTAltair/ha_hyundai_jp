@@ -1,0 +1,3 @@
+{
+  "required_hook_events": ["PreToolUse", "Stop", "WorktreeCreate", "WorktreeRemove"]
+}
