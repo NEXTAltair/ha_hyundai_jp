@@ -1,0 +1,28 @@
+# Local credentials and diagnostic captures
+local-private/
+.env
+.env.*
+!.env.example
+
+# Python environments and generated files
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+
+# Claude Code personal settings (absolute local paths)
+.claude/settings.local.json
+
+# Local session handoff (local paths and investigation notes)
+active_context.md
