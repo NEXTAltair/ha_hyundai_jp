@@ -6,7 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## リポジトリの現状
 
-- アプリケーションコード、初回 commit、GitHub remote はまだない。新しい domain 文字列も未確定。
+- アプリケーションコードはまだない。新しい domain 文字列も未確定。
+- GitHub は private リポジトリ `NEXTAltair/ha_hyundai_jp`（remote `origin`）。課題は Issue で管理する。`active_context.md` は `.gitignore` 済みで、ローカルにだけある。
 - コードは参考実装 `/home/altair/src/ha_kia_hyundai_USA-jp-reference`（旧 fork の `v3.3.3-jp.2`、本番でモニタリング動作確認済み）から必要な部分を移す。参考実装5件は `~/code-workspace/ha_hyundai_jp.code-workspace` のフォルダーと同じで、`.claude/settings.local.json` の `additionalDirectories` から読める（Edit/Write は deny 済み）。用途と取得元は `active_context.md` を参照。参考実装は読むだけにして変更しない。
 - 旧作業場所 `/home/altair/src/ha_kia_hyundai_USA` は reset や広範囲の `git add` をしない。未コミットの記録と `local-private/` がある。
 
