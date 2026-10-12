@@ -9,14 +9,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## リポジトリの現状
 
-- アプリケーションコードはまだない。新しい domain 文字列も未確定。
+- アプリケーションコードはまだない。domain は `hyundai_bluelink_jp` が有力だが未確定（#7）。
 - GitHub は private リポジトリ `NEXTAltair/ha_hyundai_jp`（remote `origin`）。課題は Issue で管理する。`active_context.md` は `.gitignore` 済みで、ローカルにだけある。
 - コードは参考実装 `/home/altair/src/ha_kia_hyundai_USA-jp-reference`（旧 fork の `v3.3.3-jp.2`、本番でモニタリング動作確認済み）から必要な部分を移す。参考実装5件は `~/code-workspace/ha_hyundai_jp.code-workspace` のフォルダーと同じで、`.claude/settings.local.json` の `additionalDirectories` から読める（Edit/Write は deny 済み）。用途と取得元は `active_context.md` を参照。参考実装は読むだけにして変更しない。
 - 旧作業場所 `/home/altair/src/ha_kia_hyundai_USA` は reset や広範囲の `git add` をしない。未コミットの記録と `local-private/` がある。
 
 ## コマンド（参考実装の構成。移植後に合わせて更新する）
 
-Python 3.12、テスト環境は Home Assistant 2025.1.4 に固定（`pytest-homeassistant-custom-component==0.13.205`）。
+Python 3.12、テスト環境は Home Assistant 2025.1.4 に固定（`pytest-homeassistant-custom-component==0.13.205`）。新しい日本版では HA 2025.1.4 の固定を引き継がない。HA が配布している HA Core 最新版の Docker イメージで動作を確認する（2026-10-13 決定）。
 
 ```bash
 python3 -m pip install -r requirements-test.txt
@@ -51,6 +51,7 @@ CI は Ruff、pytest、Hassfest、HACS validation を実行する。テストは
 ## 守ること
 
 - 実車への操作コマンド（施錠、空調、充電など）は、ユーザーの明示的な指示なしに送らない。操作 API は日本版公式アプリで確認し、韓国版や米国版のリクエストが通ると仮定しない。
-- CFB、client secret、資格情報、HA 診断ファイルの生データをチャット、ログ、commit に出さない。CFB は `/home/altair/src/ha_kia_hyundai_USA/local-private/jp-stamp-config.json` にある。
+- 漏らしてはいけないのは、ユーザーの Bluelink アカウントのメールアドレスとパスワード、遠隔操作の PIN、それと同じように使えるログイン後のトークンや cookie。チャット、ログ、commit に出さない。HA 診断ファイルにはこれらが含まれ得るので、生データを出す前に確認する。
+- CFB と OAuth client secret は秘密ではない。海外仕様（`KiaUvoApiEU.py` など）と同じくコードに定数として埋め込む（2026-10-13 決定、#5）ので、チャットに出してよい。CFB の値は `/home/altair/src/ha_kia_hyundai_USA/local-private/jp-stamp-config.json` にある。
 - 実車で確認できるのは日本版 IONIQ 5 のみ。他車種を対応済みとして扱わない。
 - HACS はリリースタグを参照する。マージしただけでは配布されないので、リリースの公開まで考える。
