@@ -51,7 +51,7 @@ tags: [home-assistant, docker, qa, monitoring]
 | 設定画面 | 日本語の説明とメールアドレス・パスワードだけを表示する | 成功。CFB、client secret、PIN の入力なし |
 | 入力型 | メール欄が email、パスワード欄が password で、両方必須である | 成功。DOM の型と必須属性を確認 |
 | 空欄 | 空欄のまま送信し、バックエンドへ入力を送らない | 成功 |
-| メール形式 | `invalid-address` をメール欄へ入れ、形式エラーで送信を止める | 未達。下記の指摘を参照 |
+| メール形式 | `invalid-address` をメール欄へ入れた場合の挙動を確認する | 送信処理へ進む。参考実装との比較とユーザー判断により、事前の形式チェックは要求しない |
 | キャンセル | 設定ダイアログを閉じる | 成功。設定エントリーを作成しない |
 | Core ログ | 起動からログイン・定期取得・再読み込み後までの ERROR/CRITICAL を確認する | 0件。起動時に未検証 custom integration の通常の警告あり |
 | 実アカウントの設定 | Bluelink へログインし、設定エントリーが loaded になる | 成功。ユーザーが画面で設定し、loaded を確認 |
@@ -64,7 +64,11 @@ tags: [home-assistant, docker, qa, monitoring]
 pageerror が記録された。後続の設定画面・入力検証・状態照会では再現せず、
 対応する Core エラーもなかった。原因の特定はしていない。
 
-## 入力検証の指摘
+## メール形式の扱い
+
+メール形式の事前チェックは追加しない。ユーザーは海外版の参考実装がチェックしている場合に
+合わせる意向を示したが、取得済みの米国版・共通版の設定フローにその処理はなかった。
+この挙動を不具合・改善候補として扱わない。
 
 メール入力は `type=email` で、`invalid-address` に対して DOM の
 `validity.typeMismatch` が true になる。それでも送信操作で、
@@ -73,8 +77,15 @@ pageerror が記録された。後続の設定画面・入力検証・状態照�
 
 検証用ブラウザの request interception で、この POST は HA バックエンドへ到達する前に遮断した。
 ダミーの資格情報を Bluelink に送信していない。
-正しいメールアドレスでの設定に支障があるとは確認できていない。
-今回アプリコードは変更せず、形式チェックを config flow 側でも行うかを後続の判断とする。
+正しいメールアドレスでの設定は成功した。アプリコードは変更していない。
+
+取得済みソースの比較結果は以下。海外版の画面を起動した検証ではなく、設定フローの実装確認。
+
+| 参考実装 | 確認結果 |
+| --- | --- |
+| [米国版 `541ff2a`](https://github.com/MarcusTaz/ha_kia_hyundai_USA/blob/541ff2afad4fbc7b971804f11f34042b006fd29f/custom_components/ha_kia_hyundai/config_flow.py#L238-L252) | ユーザー名は必須の文字列。Hyundai / Genesis の設定では PIN の4桁チェックはあるが、メール形式のチェックはない |
+| [共通版 `25e1c76`](https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/25e1c76a52bd9f6181082ff5a01b8b426e978cba/custom_components/kia_uvo/config_flow.py#L96-L102) | ユーザー名は必須の文字列。`validate_input` は API クライアントのログインを呼び、結果で認証を判定する |
+| [韓国版 `1eec785`](https://github.com/fregmented/hass-bluelink-kr/blob/1eec785668e51cc9e18670d8e79c652104d8871f/custom_components/bluelink_kr/config_flow.py#L49-L139) | 外部 OAuth 認証画面を使い、統合側にメール入力欄がないため直接の比較対象外 |
 
 ## 実データの表示と診断
 
