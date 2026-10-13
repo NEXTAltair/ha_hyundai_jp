@@ -1,7 +1,7 @@
 ---
 type: Investigation
 title: 共通 API ライブラリへの日本対応追加の評価
-description: 同期 requests と日本専用クラスを使う案の再利用範囲、差分、検証条件。
+description: 同期 requests と日本専用クラスを使う案の再利用範囲、差分、検証条件。この案は採用を見送った（ADR 0001）。
 timestamp: 2026-10-13
 status: active
 tags: [bluelink, japan, api, home-assistant]
@@ -11,6 +11,7 @@ tags: [bluelink, japan, api, home-assistant]
 
 [Issue #6](https://github.com/NEXTAltair/ha_hyundai_jp/issues/6) の先行実装調査。
 本書の推奨は実装・実車確認前の評価であり、採用を確定する ADR ではない。
+ユーザーはこの推奨を採用しなかった。判断と理由は [ADR 0001](../decisions/0001-jp-api-client-in-integration.md) を参照。
 
 ## 結論
 
