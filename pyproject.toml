@@ -1,0 +1,71 @@
+[project]
+name = "ha-hyundai-bluelink-jp"
+version = "0.1.0"
+description = "日本向け Hyundai Bluelink の Home Assistant カスタム統合（開発用の依存定義）"
+requires-python = ">=3.14.2"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest-homeassistant-custom-component>=0.13.372",
+    "ruff>=0.14",
+    "mypy>=1.18",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.ruff]
+# check は read-only。自動修正は `ruff check --fix` を明示したときだけ
+fix = false
+line-length = 108
+target-version = "py314"
+exclude = ["*/__pycache__"]
+# 開発キットの設定と文書の中のコード例は対象にしない
+extend-exclude = [".agent-kit", ".agents", ".claude", ".codex", "docs"]
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C4",  # flake8-comprehensions
+    "C90", # McCabe complexity
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "RUF", # Ruff 固有 (全角記号の混入検出 RUF001-003 を含む)
+    "S",   # flake8-bandit
+]
+ignore = [
+    "E501", # 行長は line-length と formatter で制御
+]
+# 日本語表記として自然な文字だけ confusable 警告から除外する
+allowed-confusables = ["ノ", "（", "）", "×", "、", "。", "：", "・"]
+
+[tool.ruff.lint.per-file-ignores]
+# テストでは assert (S101) を使い、架空の資格情報 (S105, S106) をモックサーバーに渡す
+"tests/**" = ["S101", "S105", "S106"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+strict = true
+python_version = "3.14"
+ignore_missing_imports = true
+exclude = ['^tests/']
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+ignore_errors = true
+follow_imports = "skip"

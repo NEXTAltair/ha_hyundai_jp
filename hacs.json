@@ -1,0 +1,6 @@
+{
+  "name": "Hyundai Bluelink Japan",
+  "homeassistant": "2026.10.0",
+  "country": ["JP"],
+  "render_readme": true
+}
