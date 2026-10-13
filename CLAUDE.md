@@ -28,7 +28,7 @@ uv run ruff check . && uv run ruff format --check .
 uv run mypy custom_components
 ```
 
-CI（`.github/workflows/ci.yml`）は Ruff、mypy、pytest、Hassfest、HACS validation を実行する。テストは localhost のモックサーバーと合成データを使い、実車や実サーバーには接続しない。
+CI（`.github/workflows/ci.yml`）は Ruff、mypy、pytest、Hassfest を実行する。HACS validation は private リポジトリでは通らないので、公開するときにライセンスと topics を決めてから戻す。テストは localhost のモックサーバーと合成データを使い、実車や実サーバーには接続しない。
 
 ## アーキテクチャ
 
