@@ -1,6 +1,7 @@
 """設定画面と再認証。"""
 
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 from homeassistant.config_entries import SOURCE_USER
@@ -106,3 +107,14 @@ async def test_reauth_updates_password(
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reauth_successful"
     assert config_entry.data == {CONF_EMAIL: EMAIL, CONF_PASSWORD: "new-password"}
+
+
+async def test_validation_session_is_detached(hass: HomeAssistant, mock_client: SimpleNamespace) -> None:
+    # HA 共有の接続プールを閉じないよう、確認用のセッションは detach() で切り離す。
+    with patch("custom_components.hyundai_bluelink_jp.config_flow.async_create_clientsession") as create:
+        result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
+        await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_EMAIL: EMAIL, CONF_PASSWORD: PASSWORD}
+        )
+    create.return_value.detach.assert_called_once_with()
+    create.return_value.close.assert_not_called()

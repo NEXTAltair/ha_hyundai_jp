@@ -134,6 +134,6 @@ class BluelinkJpLastFetchedSensor(BluelinkJpEntity, SensorEntity):
         super().__init__(coordinator, vehicle, "last_fetched")
 
     @property
-    def native_value(self) -> datetime:
-        """最後に取得に成功した時刻。"""
-        return self.coordinator.data.fetched_at
+    def native_value(self) -> datetime | None:
+        """この車両の状態を最後に取得できた時刻。"""
+        return self.coordinator.data.fetched_at.get(self.vehicle.vehicle_id)

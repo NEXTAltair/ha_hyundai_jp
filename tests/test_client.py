@@ -47,6 +47,7 @@ class FakeBluelink:
     status_devices: list[str] = field(default_factory=list)
     status_code: int = 200
     status_bodies: list[Any] = field(default_factory=list)
+    auth_code: str = "test-code"
 
     async def authorize(self, request: web.Request) -> web.StreamResponse:
         assert request.query["lang"] == "ja"
@@ -77,14 +78,17 @@ class FakeBluelink:
         self.signin_language = self.session_language
         if self.signin_status != 200:
             return web.json_response({"errCode": self.signin_err_code}, status=self.signin_status)
-        redirect = request.url.with_path("/redirect").with_query(code="test-code")
+        redirect = request.url.with_path("/redirect").with_query(code=self.auth_code)
         return web.json_response({"redirectUrl": str(redirect)})
 
     async def token(self, request: web.Request) -> web.Response:
         assert request.cookies["login-session"] == "synthetic-session"
         basic = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
         assert request.headers["Authorization"] == f"Basic {basic}"
-        assert (await request.post())["code"] == "test-code"
+        form = await request.post()
+        assert form["grant_type"] == "authorization_code"
+        assert form["redirect_uri"] == str(request.url.with_path("/user/oauth2/redirect").with_query(None))
+        assert form["code"] == self.auth_code
         self.calls.append("token")
         return web.json_response({"token_type": "Bearer", "access_token": "test-token", "expires_in": 3600})
 
@@ -331,3 +335,11 @@ async def test_unauthorized_status_logs_in_on_next_fetch(
     fake.status_code = 200
     await client.async_get_vehicle_status("test-car")
     assert fake.calls == [*LOGIN_CALLS, "status"]
+
+
+async def test_authorization_code_is_form_encoded(bluelink: tuple[BluelinkJpClient, FakeBluelink]) -> None:
+    client, fake = bluelink
+    # フォームで意味を持つ文字を含む認可コードも、そのまま交換できる。
+    fake.auth_code = "a+b/c&d=e%f g"
+    await client.async_login()
+    assert fake.calls == LOGIN_CALLS

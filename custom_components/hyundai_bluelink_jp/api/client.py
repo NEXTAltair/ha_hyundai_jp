@@ -123,7 +123,7 @@ class BluelinkJpClient:
         *,
         headers: dict[str, str],
         json_body: dict[str, Any] | None = None,
-        form: str | None = None,
+        form: dict[str, str] | None = None,
     ) -> _Response:
         try:
             async with self._session.request(
@@ -222,12 +222,9 @@ class BluelinkJpClient:
         response = await self._request(
             "POST",
             USER_API_URL + "oauth2/token",
-            headers={
-                "Authorization": f"Basic {basic}",
-                "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": USER_AGENT,
-            },
-            form=f"grant_type=authorization_code&redirect_uri={redirect_uri}&code={code}",
+            headers={"Authorization": f"Basic {basic}", "User-Agent": USER_AGENT},
+            # 辞書で渡し、aiohttp に application/x-www-form-urlencoded として各値をエンコードさせる。
+            form={"grant_type": "authorization_code", "redirect_uri": redirect_uri, "code": code},
         )
         body = response.body if isinstance(response.body, dict) else {}
         if not 200 <= response.status < 304 or "access_token" not in body:

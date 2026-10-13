@@ -17,8 +17,11 @@ from custom_components.hyundai_bluelink_jp.api import (
     AccountLockedError,
     AuthenticationError,
     BluelinkError,
+    BluelinkJpClient,
     RequestFailedError,
+    UnsupportedVehicleError,
     Vehicle,
+    VehicleStatus,
 )
 from custom_components.hyundai_bluelink_jp.const import DOMAIN
 
@@ -159,3 +162,40 @@ async def test_first_fetch_failure_retries_setup(
     mock_client.status.side_effect = RequestFailedError("HTTP 500", http_status=500)
     await _setup(hass, config_entry)
     assert config_entry.state is ConfigEntryState.SETUP_RETRY
+
+
+async def test_one_failing_vehicle_does_not_hide_others(
+    hass: HomeAssistant,
+    mock_client: SimpleNamespace,
+    config_entry: MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    status = mock_client.status.return_value
+    mock_client.vehicles.return_value = [
+        Vehicle(vehicle_id="test-car", name="IONIQ 5", model="IONIQ 5", is_ev=True),
+        Vehicle(vehicle_id="old-car", name="Old car", model="", is_ev=True),
+    ]
+    failing = {"old-car"}
+
+    async def fetch(client: BluelinkJpClient, vehicle_id: str) -> VehicleStatus:
+        if vehicle_id in failing:
+            raise UnsupportedVehicleError("HTTP 404", http_status=404)
+        return status
+
+    mock_client.status.side_effect = fetch
+    await _setup(hass, config_entry)
+    assert config_entry.state is ConfigEntryState.LOADED
+    assert _state(hass, "sensor", "ev_battery_level") == "73"
+    assert _state(hass, "sensor", "ev_battery_level", "old-car") == STATE_UNAVAILABLE
+    assert _state(hass, "sensor", "last_fetched", "old-car") == STATE_UNAVAILABLE
+    assert caplog.text.count("Old car の状態を取得できませんでした") == 1
+
+    # 失敗し続けても、警告は繰り返さない。
+    await config_entry.runtime_data.async_refresh()
+    assert caplog.text.count("Old car の状態を取得できませんでした") == 1
+
+    failing.clear()
+    await config_entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+    assert _state(hass, "sensor", "ev_battery_level", "old-car") == "73"
+    assert "Old car の状態を再び取得できました" in caplog.text

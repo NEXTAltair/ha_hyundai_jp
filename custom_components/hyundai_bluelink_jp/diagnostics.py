@@ -61,6 +61,7 @@ async def async_get_config_entry_diagnostics(
                 "model": vehicle.model,
                 "is_ev": vehicle.is_ev,
                 "fetch_result": client.fetch_results.get(vehicle_id, {"state": "not_requested"}),
+                "fetched_at": coordinator.data.fetched_at.get(vehicle_id) if coordinator.data else None,
                 "status": None if status is None else async_redact_data(asdict(status), TO_REDACT_STATUS),
                 "raw_response": None
                 if raw_response is None
@@ -70,6 +71,5 @@ async def async_get_config_entry_diagnostics(
     return {
         "entry": async_redact_data(entry.as_dict(), TO_REDACT_ENTRY),
         "last_update_success": coordinator.last_update_success,
-        "fetched_at": coordinator.data.fetched_at if coordinator.data else None,
         "vehicles": vehicles,
     }

@@ -28,14 +28,15 @@ REAUTH_SCHEMA = probatio.Schema({probatio.Required(CONF_PASSWORD): _PASSWORD_SEL
 
 
 async def _async_fetch_vehicles(hass: HomeAssistant, email: str, password: str) -> list[Vehicle]:
-    # 確認のためだけのセッションなので、使い終わったら閉じる。
+    # 確認のためだけのセッション。HA 共有の接続プールを使うので、close() ではなく
+    # detach() で切り離す（auto_cleanup=False のときの HA の作法）。
     session = async_create_clientsession(hass, auto_cleanup=False)
     try:
         client = BluelinkJpClient(session, email, password)
         await client.async_login()
         return await client.async_get_vehicles()
     finally:
-        await session.close()
+        session.detach()
 
 
 async def _async_validate(hass: HomeAssistant, email: str, password: str) -> str | None:

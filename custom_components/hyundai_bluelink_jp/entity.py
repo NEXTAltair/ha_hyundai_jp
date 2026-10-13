@@ -32,6 +32,11 @@ class BluelinkJpEntity(CoordinatorEntity[BluelinkJpCoordinator]):
         )
 
     @property
+    def available(self) -> bool:
+        """直近の取得でこの車両の状態を得られたときだけ利用可能にする。"""
+        return super().available and self.vehicle.vehicle_id in self.coordinator.data.statuses
+
+    @property
     def vehicle_status(self) -> VehicleStatus | None:
         """直近に取得したこの車両の状態。"""
         return self.coordinator.data.statuses.get(self.vehicle.vehicle_id)
