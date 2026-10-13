@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hyundai Bluelink Japan",
+        "description": "Sign in with the account you use in the Hyundai Bluelink app for Japan.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Sign in again",
+        "description": "The password was not accepted. Enter the current password for this account.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "The email or password is incorrect.",
+      "account_locked": "The account is temporarily locked after repeated failed sign-ins. Wait before trying again.",
+      "cannot_connect": "Could not connect to Hyundai Bluelink.",
+      "no_vehicles": "No vehicles are registered to this account."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "reauth_successful": "Signed in again."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "ev_battery_level": {
+        "name": "EV battery"
+      },
+      "ev_range": {
+        "name": "Range"
+      },
+      "odometer": {
+        "name": "Odometer"
+      },
+      "aux_battery_level": {
+        "name": "12V battery"
+      },
+      "charge_remaining_time": {
+        "name": "Charging time remaining"
+      },
+      "last_synced": {
+        "name": "Last synced to cloud"
+      },
+      "last_fetched": {
+        "name": "Last fetched"
+      }
+    },
+    "binary_sensor": {
+      "door_lock": {
+        "name": "Door lock"
+      },
+      "hood": {
+        "name": "Hood"
+      },
+      "trunk": {
+        "name": "Trunk"
+      },
+      "driver_door": {
+        "name": "Driver door"
+      },
+      "passenger_door": {
+        "name": "Passenger door"
+      },
+      "rear_left_door": {
+        "name": "Rear left door"
+      },
+      "rear_right_door": {
+        "name": "Rear right door"
+      },
+      "driving_ready": {
+        "name": "Ready to drive"
+      },
+      "tire_pressure": {
+        "name": "Tire pressure"
+      },
+      "charging": {
+        "name": "Charging"
+      },
+      "plugged_in": {
+        "name": "Charger connected"
+      }
+    },
+    "device_tracker": {
+      "location": {
+        "name": "Location"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "hyundai_bluelink_jp",
+  "name": "Hyundai Bluelink Japan",
+  "codeowners": ["@NEXTAltair"],
+  "config_flow": true,
+  "documentation": "https://github.com/NEXTAltair/ha_hyundai_jp",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/NEXTAltair/ha_hyundai_jp/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

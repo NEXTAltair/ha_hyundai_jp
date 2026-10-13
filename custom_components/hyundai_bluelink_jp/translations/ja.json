@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hyundai Bluelink Japan",
+        "description": "日本版 Hyundai Bluelink アプリで使っているアカウントでログインします。",
+        "data": {
+          "email": "メールアドレス",
+          "password": "パスワード"
+        }
+      },
+      "reauth_confirm": {
+        "title": "再ログイン",
+        "description": "パスワードが受け付けられませんでした。このアカウントの今のパスワードを入力してください。",
+        "data": {
+          "password": "パスワード"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "メールアドレスかパスワードが違います。",
+      "account_locked": "ログインの失敗が続いたため、アカウントが一時的にロックされています。時間をおいてから試してください。",
+      "cannot_connect": "Hyundai Bluelink に接続できませんでした。",
+      "no_vehicles": "このアカウントには車両が登録されていません。"
+    },
+    "abort": {
+      "already_configured": "このアカウントは設定済みです。",
+      "reauth_successful": "再ログインしました。"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "ev_battery_level": {
+        "name": "駆動用バッテリー"
+      },
+      "ev_range": {
+        "name": "航続可能距離"
+      },
+      "odometer": {
+        "name": "走行距離"
+      },
+      "aux_battery_level": {
+        "name": "補機バッテリー"
+      },
+      "charge_remaining_time": {
+        "name": "充電の残り時間"
+      },
+      "last_synced": {
+        "name": "車両の最終同期"
+      },
+      "last_fetched": {
+        "name": "最終取得"
+      }
+    },
+    "binary_sensor": {
+      "door_lock": {
+        "name": "ドアロック"
+      },
+      "hood": {
+        "name": "ボンネット"
+      },
+      "trunk": {
+        "name": "トランク"
+      },
+      "driver_door": {
+        "name": "運転席ドア"
+      },
+      "passenger_door": {
+        "name": "助手席ドア"
+      },
+      "rear_left_door": {
+        "name": "後席左ドア"
+      },
+      "rear_right_door": {
+        "name": "後席右ドア"
+      },
+      "driving_ready": {
+        "name": "走行可能"
+      },
+      "tire_pressure": {
+        "name": "タイヤ空気圧"
+      },
+      "charging": {
+        "name": "充電"
+      },
+      "plugged_in": {
+        "name": "充電コネクター"
+      }
+    },
+    "device_tracker": {
+      "location": {
+        "name": "位置"
+      }
+    }
+  }
+}
