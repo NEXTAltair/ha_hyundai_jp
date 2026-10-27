@@ -17,6 +17,7 @@ from custom_components.hyundai_bluelink_jp.api import (
     BluelinkJpClient,
     DeviceRegistrationError,
     GatewayRejectedError,
+    PasswordChangeRequiredError,
     RequestFailedError,
     UnsupportedVehicleError,
     Vehicle,
@@ -42,6 +43,7 @@ class FakeBluelink:
     signin_language: str | None = None
     signin_status: int = 200
     signin_err_code: str | None = None
+    signin_step: int | None = None
     register_status: int = 200
     registered_devices: list[str] = field(default_factory=list)
     status_devices: list[str] = field(default_factory=list)
@@ -78,6 +80,8 @@ class FakeBluelink:
         self.signin_language = self.session_language
         if self.signin_status != 200:
             return web.json_response({"errCode": self.signin_err_code}, status=self.signin_status)
+        if self.signin_step is not None:
+            return web.json_response({"step": self.signin_step, "upgrade": False})
         redirect = request.url.with_path("/redirect").with_query(code=self.auth_code)
         return web.json_response({"redirectUrl": str(redirect)})
 
@@ -230,6 +234,16 @@ async def test_signin_errors(
     assert type(raised.value) is error
     assert PASSWORD not in str(raised.value)
     assert "token" not in fake.calls
+
+
+async def test_step_five_requires_official_password_prompt(
+    bluelink: tuple[BluelinkJpClient, FakeBluelink],
+) -> None:
+    client, fake = bluelink
+    fake.signin_step = 5
+    with pytest.raises(PasswordChangeRequiredError, match="パスワード変更"):
+        await client.async_login()
+    assert fake.calls == ["authorize", "language", "signin"]
 
 
 async def test_status_registers_device_once(bluelink: tuple[BluelinkJpClient, FakeBluelink]) -> None:

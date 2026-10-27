@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
-from homeassistant.config_entries import SOURCE_USER
+from homeassistant.config_entries import SOURCE_RECONFIGURE, SOURCE_USER
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -14,6 +14,7 @@ from custom_components.hyundai_bluelink_jp.api import (
     AccountLockedError,
     AuthenticationError,
     BluelinkError,
+    PasswordChangeRequiredError,
 )
 from custom_components.hyundai_bluelink_jp.const import DEFAULT_TITLE, DOMAIN
 
@@ -40,6 +41,7 @@ async def test_user_flow_creates_entry(hass: HomeAssistant, mock_client: SimpleN
     ("error", "vehicles", "reason"),
     [
         (AuthenticationError("wrong"), None, "invalid_auth"),
+        (PasswordChangeRequiredError("change"), None, "password_change_required"),
         (AccountLockedError("locked"), None, "account_locked"),
         (BluelinkError("timeout"), None, "cannot_connect"),
         (None, [], "no_vehicles"),
@@ -107,6 +109,35 @@ async def test_reauth_updates_password(
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reauth_successful"
     assert config_entry.data == {CONF_EMAIL: EMAIL, CONF_PASSWORD: "new-password"}
+
+
+async def test_reconfigure_updates_existing_entry_after_failed_setup(
+    hass: HomeAssistant, mock_client: SimpleNamespace, config_entry: MockConfigEntry
+) -> None:
+    config_entry.add_to_hass(hass)
+    mock_client.login.side_effect = BluelinkError("unsupported response")
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    assert config_entry.supports_reconfigure
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_RECONFIGURE, "entry_id": config_entry.entry_id}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reconfigure"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_PASSWORD: "new-password"}
+    )
+    assert result["errors"] == {"base": "cannot_connect"}
+    assert config_entry.data[CONF_PASSWORD] == PASSWORD
+
+    mock_client.login.side_effect = None
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_PASSWORD: "new-password"}
+    )
+    await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert config_entry.data == {CONF_EMAIL: EMAIL, CONF_PASSWORD: "new-password"}
+    assert len(hass.config_entries.async_entries(DOMAIN)) == 1
 
 
 async def test_validation_session_is_detached(hass: HomeAssistant, mock_client: SimpleNamespace) -> None:

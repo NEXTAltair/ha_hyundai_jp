@@ -14,7 +14,14 @@ from homeassistant.helpers.selector import (
     TextSelectorType,
 )
 
-from .api import AccountLockedError, AuthenticationError, BluelinkError, BluelinkJpClient, Vehicle
+from .api import (
+    AccountLockedError,
+    AuthenticationError,
+    BluelinkError,
+    BluelinkJpClient,
+    PasswordChangeRequiredError,
+    Vehicle,
+)
 from .const import DEFAULT_TITLE, DOMAIN
 
 _PASSWORD_SELECTOR = TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD))
@@ -43,6 +50,8 @@ async def _async_validate(hass: HomeAssistant, email: str, password: str) -> str
     """ログインと車両一覧の取得を試し、失敗したら画面に出すエラーのキーを返す。"""
     try:
         vehicles = await _async_fetch_vehicles(hass, email, password)
+    except PasswordChangeRequiredError:
+        return "password_change_required"
     except AuthenticationError:
         return "invalid_auth"
     except AccountLockedError:
@@ -85,6 +94,19 @@ class BluelinkJpConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_reauth(self, entry_data: Mapping[str, Any]) -> ConfigFlowResult:
         """パスワードが通らなくなったときに再認証を始める。"""
         return await self.async_step_reauth_confirm()
+
+    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """設定済みアカウントのパスワードを変更する。"""
+        errors: dict[str, str] = {}
+        entry = self._get_reconfigure_entry()
+        if user_input is not None:
+            error = await _async_validate(self.hass, entry.data[CONF_EMAIL], user_input[CONF_PASSWORD])
+            if error is None:
+                return self.async_update_reload_and_abort(
+                    entry, data_updates={CONF_PASSWORD: user_input[CONF_PASSWORD]}
+                )
+            errors["base"] = error
+        return self.async_show_form(step_id="reconfigure", data_schema=REAUTH_SCHEMA, errors=errors)
 
     async def async_step_reauth_confirm(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """新しいパスワードを受け取る。"""

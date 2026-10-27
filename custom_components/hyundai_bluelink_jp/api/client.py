@@ -25,6 +25,7 @@ from .errors import (
     BluelinkError,
     DeviceRegistrationError,
     GatewayRejectedError,
+    PasswordChangeRequiredError,
     RequestFailedError,
     UnsupportedResponseError,
     UnsupportedVehicleError,
@@ -209,9 +210,11 @@ class BluelinkJpClient:
             )
         redirect_url = body.get("redirectUrl")
         if not isinstance(redirect_url, str):
-            raise UnsupportedResponseError(
-                f"サインインに未対応の追加手順が必要です（step={body.get('step')!r}）"
-            )
+            if body.get("step") == 5:
+                raise PasswordChangeRequiredError(
+                    "公式 Bluelink のログイン画面でパスワード変更の案内を確認してください"
+                )
+            raise UnsupportedResponseError(f"サインインの応答を処理できません（step={body.get('step')!r}）")
         codes = parse_qs(urlparse(redirect_url).query).get("code")
         if not codes:
             raise UnsupportedResponseError("サインインの応答に認可コードがありません")

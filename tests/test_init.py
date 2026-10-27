@@ -18,6 +18,7 @@ from custom_components.hyundai_bluelink_jp.api import (
     AuthenticationError,
     BluelinkError,
     BluelinkJpClient,
+    PasswordChangeRequiredError,
     RequestFailedError,
     UnsupportedVehicleError,
     Vehicle,
@@ -154,6 +155,16 @@ async def test_setup_errors(
     mock_client.login.side_effect = error
     await _setup(hass, config_entry)
     assert config_entry.state is state
+
+
+async def test_password_change_prompt_starts_reauth(
+    hass: HomeAssistant, mock_client: SimpleNamespace, config_entry: MockConfigEntry
+) -> None:
+    mock_client.login.side_effect = PasswordChangeRequiredError("password change")
+    await _setup(hass, config_entry)
+    assert config_entry.state is ConfigEntryState.SETUP_ERROR
+    flows = hass.config_entries.flow.async_progress_by_handler(DOMAIN)
+    assert [flow["context"]["source"] for flow in flows] == [SOURCE_REAUTH]
 
 
 async def test_first_fetch_failure_retries_setup(
