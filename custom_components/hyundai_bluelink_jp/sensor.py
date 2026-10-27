@@ -13,6 +13,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfLength, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .api import Vehicle, VehicleStatus
 from .coordinator import BluelinkJpConfigEntry, BluelinkJpCoordinator
@@ -97,7 +98,64 @@ async def async_setup_entry(
             if vehicle.is_ev or not description.ev_only
         )
         entities.append(BluelinkJpLastFetchedSensor(coordinator, vehicle))
+    entities.append(BluelinkJpIncidentSensor(coordinator, entry.entry_id))
     async_add_entities(entities)
+
+
+_REASON_LABELS = {
+    "communication_error": "通信エラー",
+    "invalid_auth": "認証情報が無効",
+    "password_change_required": "パスワード変更の確認",
+    "account_locked": "アカウントの一時ロック",
+    "http_error": "サーバー応答エラー",
+    "gateway_rejected": "ゲートウェイ拒否",
+    "api_error": "API エラー",
+    "device_registration_failed": "端末登録失敗",
+    "unsupported_vehicle": "未対応の車両",
+    "unsupported_response": "未対応の応答",
+}
+
+
+class BluelinkJpIncidentSensor(CoordinatorEntity[BluelinkJpCoordinator], SensorEntity):
+    """車両取得が失敗しても直近の障害履歴を表示する。"""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "incident_history"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:history"
+
+    def __init__(self, coordinator: BluelinkJpCoordinator, entry_id: str) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry_id}_incident_history"
+
+    @property
+    def available(self) -> bool:
+        """通信失敗時にも保存した履歴を確認できる。"""
+        return True
+
+    @property
+    def native_value(self) -> int:
+        return len(self.coordinator.history.public_incidents())
+
+    @property
+    def extra_state_attributes(self) -> dict[str, object]:
+        """画面には新しい障害から最大20件を表示する。"""
+        records = self.coordinator.history.public_incidents()
+        return {
+            "直近の障害": [
+                {
+                    "対象": "車両" if item["target"] == "vehicle" else "アカウント",
+                    "検出": item["started"],
+                    "最後に失敗": item["last_seen"],
+                    "復旧": item["ended"],
+                    "最初の原因": _REASON_LABELS.get(item["reason"], "不明"),
+                    "直近の原因": _REASON_LABELS.get(item["latest_reason"], "不明"),
+                    "HTTP": item["latest_http_status"],
+                }
+                for item in reversed(records[-20:])
+            ],
+            "保存上限": 200,
+        }
 
 
 class BluelinkJpSensor(BluelinkJpEntity, SensorEntity):

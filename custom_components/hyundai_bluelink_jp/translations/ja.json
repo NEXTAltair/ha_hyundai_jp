@@ -39,6 +39,9 @@
   },
   "entity": {
     "sensor": {
+      "incident_history": {
+        "name": "接続障害の履歴"
+      },
       "ev_battery_level": {
         "name": "駆動用バッテリー"
       },
