@@ -128,6 +128,11 @@ class BluelinkJpIncidentSensor(CoordinatorEntity[BluelinkJpCoordinator], SensorE
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry_id}_incident_history"
 
+    async def async_added_to_hass(self) -> None:
+        """連続失敗中も履歴が更新されるたびに画面へ反映する。"""
+        await super().async_added_to_hass()
+        self.async_on_remove(self.coordinator.history.async_add_listener(self.async_write_ha_state))
+
     @property
     def available(self) -> bool:
         """通信失敗時にも保存した履歴を確認できる。"""

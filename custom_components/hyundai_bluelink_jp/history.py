@@ -2,9 +2,10 @@
 
 import asyncio
 import hashlib
+from collections.abc import Callable
 from typing import Any
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
@@ -38,6 +39,23 @@ class IncidentHistory:
         self._store: Store[dict[str, Any]] = Store(hass, 1, f"{DOMAIN}.incidents.{entry_id}")
         self._lock = asyncio.Lock()
         self._incidents: list[dict[str, Any]] = []
+        self._listeners: list[Callable[[], None]] = []
+
+    @callback
+    def async_add_listener(self, listener: Callable[[], None]) -> Callable[[], None]:
+        """履歴が変化したときの通知先を登録する。"""
+        self._listeners.append(listener)
+
+        @callback
+        def remove_listener() -> None:
+            self._listeners.remove(listener)
+
+        return remove_listener
+
+    async def _async_save(self) -> None:
+        await self._store.async_save({"incidents": self._incidents})
+        for listener in tuple(self._listeners):
+            listener()
 
     async def async_load(self) -> None:
         """再起動前の履歴を読み込む。"""
@@ -55,7 +73,7 @@ class IncidentHistory:
             now = dt_util.utcnow().isoformat()
             if active:
                 active.update(last_seen=now, latest_reason=reason, latest_http_status=status)
-                await self._store.async_save({"incidents": self._incidents})
+                await self._async_save()
                 return
             self._incidents.append(
                 {
@@ -74,7 +92,7 @@ class IncidentHistory:
                     (i for i, item in enumerate(self._incidents) if item["ended"] is not None), None
                 )
                 self._incidents.pop(0 if resolved is None else resolved)
-            await self._store.async_save({"incidents": self._incidents})
+            await self._async_save()
 
     async def async_recovery(self, scope: str) -> None:
         """同じ対象の障害が実際に回復した時刻を残す。"""
@@ -84,7 +102,7 @@ class IncidentHistory:
             )
             if active is not None:
                 active["ended"] = dt_util.utcnow().isoformat()
-                await self._store.async_save({"incidents": self._incidents})
+                await self._async_save()
 
     def public_incidents(self) -> list[dict[str, Any]]:
         """車両を識別できる値を含まない履歴を返す。"""

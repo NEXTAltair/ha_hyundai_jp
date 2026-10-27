@@ -91,7 +91,10 @@ async def test_initial_vehicle_failure_persists_until_success(
 
 
 async def test_vehicle_failure_and_recovery_visible_in_sensor(
-    hass: HomeAssistant, mock_client: SimpleNamespace, config_entry: MockConfigEntry
+    hass: HomeAssistant,
+    mock_client: SimpleNamespace,
+    config_entry: MockConfigEntry,
+    freezer: FrozenDateTimeFactory,
 ) -> None:
     config_entry.add_to_hass(hass)
     await hass.config_entries.async_setup(config_entry.entry_id)
@@ -105,6 +108,15 @@ async def test_vehicle_failure_and_recovery_visible_in_sensor(
     state = hass.states.get(entity_id)
     assert state is not None and state.state == "1"
     assert state.attributes["直近の障害"][0]["復旧"] is None
+    first_failure_time = state.attributes["直近の障害"][0]["最後に失敗"]
+    freezer.tick(timedelta(minutes=10))
+    mock_client.status.side_effect = BluelinkError("another private message")
+    await config_entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+    state = hass.states.get(entity_id)
+    assert state is not None and state.state == "1"
+    assert state.attributes["直近の障害"][0]["最後に失敗"] != first_failure_time
+    assert state.attributes["直近の障害"][0]["直近の原因"] == "通信エラー"
     mock_client.status.side_effect = None
     await config_entry.runtime_data.async_refresh()
     await hass.async_block_till_done()
