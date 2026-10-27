@@ -209,6 +209,16 @@ class BluelinkJpClient:
                 http_status=response.status,
             )
         redirect_url = body.get("redirectUrl")
+        if not isinstance(redirect_url, str) and body.get("step") == 5:
+            # 公式画面の「スキップ」と同じセッションで1回だけ見送る。
+            response = await self._request(
+                "PUT",
+                USER_API_URL + "password/skip",
+                headers={"Content-Type": "application/json", "User-Agent": USER_AGENT},
+            )
+            self._raise_for_status(response, "パスワード変更案内のスキップ")
+            body = response.body if isinstance(response.body, dict) else {}
+            redirect_url = body.get("redirectUrl")
         if not isinstance(redirect_url, str):
             if body.get("step") == 5:
                 raise PasswordChangeRequiredError(

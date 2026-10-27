@@ -19,6 +19,7 @@ from custom_components.hyundai_bluelink_jp.api import (
     GatewayRejectedError,
     PasswordChangeRequiredError,
     RequestFailedError,
+    UnsupportedResponseError,
     UnsupportedVehicleError,
     Vehicle,
     make_stamp,
@@ -44,6 +45,8 @@ class FakeBluelink:
     signin_status: int = 200
     signin_err_code: str | None = None
     signin_step: int | None = None
+    skip_status: int = 200
+    skip_step: int | None = None
     register_status: int = 200
     registered_devices: list[str] = field(default_factory=list)
     status_devices: list[str] = field(default_factory=list)
@@ -96,6 +99,17 @@ class FakeBluelink:
         self.calls.append("token")
         return web.json_response({"token_type": "Bearer", "access_token": "test-token", "expires_in": 3600})
 
+    async def skip_password(self, request: web.Request) -> web.Response:
+        assert request.cookies["login-session"] == "synthetic-session"
+        assert not await request.read()
+        self.calls.append("skip_password")
+        if self.skip_status != 200:
+            return web.json_response({}, status=self.skip_status)
+        if self.skip_step is not None:
+            return web.json_response({"step": self.skip_step})
+        redirect = request.url.with_path("/redirect").with_query(code=self.auth_code)
+        return web.json_response({"redirectUrl": str(redirect)})
+
     async def cars(self, request: web.Request) -> web.Response:
         assert request.headers["Authorization"] == "Bearer test-token"
         self.calls.append("cars")
@@ -136,6 +150,7 @@ class FakeBluelink:
         app.router.add_get("/login-page", self.login_page)
         app.router.add_post("/user/language", self.language)
         app.router.add_post("/user/signin", self.signin)
+        app.router.add_put("/user/password/skip", self.skip_password)
         app.router.add_post("/user/oauth2/token", self.token)
         app.router.add_get("/user/cars", self.cars)
         app.router.add_post("/spa/notifications/register", self.register)
@@ -236,12 +251,42 @@ async def test_signin_errors(
     assert "token" not in fake.calls
 
 
-async def test_step_five_requires_official_password_prompt(
+async def test_step_five_skips_password_prompt(
     bluelink: tuple[BluelinkJpClient, FakeBluelink],
 ) -> None:
     client, fake = bluelink
     fake.signin_step = 5
+    await client.async_login()
+    assert fake.calls == ["authorize", "language", "signin", "skip_password", "token"]
+
+
+async def test_step_five_skip_cannot_loop(
+    bluelink: tuple[BluelinkJpClient, FakeBluelink],
+) -> None:
+    client, fake = bluelink
+    fake.signin_step = fake.skip_step = 5
     with pytest.raises(PasswordChangeRequiredError, match="パスワード変更"):
+        await client.async_login()
+    assert fake.calls == ["authorize", "language", "signin", "skip_password"]
+
+
+async def test_step_five_skip_http_failure(
+    bluelink: tuple[BluelinkJpClient, FakeBluelink],
+) -> None:
+    client, fake = bluelink
+    fake.signin_step = 5
+    fake.skip_status = 503
+    with pytest.raises(RequestFailedError):
+        await client.async_login()
+    assert fake.calls == ["authorize", "language", "signin", "skip_password"]
+
+
+async def test_other_signin_step_is_not_skipped(
+    bluelink: tuple[BluelinkJpClient, FakeBluelink],
+) -> None:
+    client, fake = bluelink
+    fake.signin_step = 4
+    with pytest.raises(UnsupportedResponseError, match="step=4"):
         await client.async_login()
     assert fake.calls == ["authorize", "language", "signin"]
 

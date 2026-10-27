@@ -8,6 +8,7 @@ from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 
 from .coordinator import BluelinkJpConfigEntry
+from .history import IncidentHistory
 
 TO_REDACT_ENTRY = {CONF_EMAIL, CONF_PASSWORD, "unique_id"}
 TO_REDACT_STATUS = {"latitude", "longitude"}
@@ -49,6 +50,13 @@ async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: BluelinkJpConfigEntry
 ) -> dict[str, Any]:
     """設定エントリーの診断情報を返す。車両 ID の代わりに通し番号を使う。"""
+    if not hasattr(entry, "runtime_data"):
+        history = IncidentHistory(hass, entry.entry_id)
+        await history.async_load()
+        return {
+            "entry": async_redact_data(entry.as_dict(), TO_REDACT_ENTRY),
+            "incidents": history.public_incidents(),
+        }
     coordinator = entry.runtime_data
     client = coordinator.client
     vehicles: list[dict[str, Any]] = []
@@ -71,5 +79,6 @@ async def async_get_config_entry_diagnostics(
     return {
         "entry": async_redact_data(entry.as_dict(), TO_REDACT_ENTRY),
         "last_update_success": coordinator.last_update_success,
+        "incidents": coordinator.history.public_incidents(),
         "vehicles": vehicles,
     }

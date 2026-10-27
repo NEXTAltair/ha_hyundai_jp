@@ -12,6 +12,7 @@ from homeassistant.util import dt as dt_util
 
 from .api import AuthenticationError, BluelinkError, BluelinkJpClient, Vehicle, VehicleStatus
 from .const import DOMAIN, UPDATE_INTERVAL
+from .history import IncidentHistory, vehicle_scope
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class BluelinkJpCoordinator(DataUpdateCoordinator[BluelinkJpData]):
         entry: BluelinkJpConfigEntry,
         client: BluelinkJpClient,
         vehicles: list[Vehicle],
+        history: IncidentHistory,
     ) -> None:
         """コーディネーターを作る。
 
@@ -59,6 +61,7 @@ class BluelinkJpCoordinator(DataUpdateCoordinator[BluelinkJpData]):
             update_interval=UPDATE_INTERVAL,
         )
         self.client = client
+        self.history = history
         self.vehicles = {vehicle.vehicle_id: vehicle for vehicle in vehicles}
         self._failed_vehicle_ids: set[str] = set()
 
@@ -69,9 +72,15 @@ class BluelinkJpCoordinator(DataUpdateCoordinator[BluelinkJpData]):
             try:
                 statuses[vehicle_id] = await self.client.async_get_vehicle_status(vehicle_id)
             except AuthenticationError as err:
+                await self.history.async_failure("account", err)
                 raise ConfigEntryAuthFailed(str(err)) from err
             except BluelinkError as err:
                 failures[vehicle_id] = err
+                await self.history.async_failure(vehicle_scope(vehicle_id), err)
+            else:
+                await self.history.async_recovery(vehicle_scope(vehicle_id))
+        if statuses:
+            await self.history.async_recovery("account")
         # 取得の失敗は古い値で隠さず、エンティティを unavailable にする（Issue #1）。
         # 1台だけの失敗は、その車両のエンティティだけを unavailable にする。
         if failures and not statuses:

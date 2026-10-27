@@ -200,6 +200,8 @@ async def test_one_failing_vehicle_does_not_hide_others(
     assert _state(hass, "sensor", "ev_battery_level", "old-car") == STATE_UNAVAILABLE
     assert _state(hass, "sensor", "last_fetched", "old-car") == STATE_UNAVAILABLE
     assert caplog.text.count("Old car の状態を取得できませんでした") == 1
+    incidents = config_entry.runtime_data.history.public_incidents()
+    assert len(incidents) == 1 and incidents[0]["ended"] is None
 
     # 失敗し続けても、警告は繰り返さない。
     await config_entry.runtime_data.async_refresh()
@@ -210,3 +212,4 @@ async def test_one_failing_vehicle_does_not_hide_others(
     await hass.async_block_till_done()
     assert _state(hass, "sensor", "ev_battery_level", "old-car") == "73"
     assert "Old car の状態を再び取得できました" in caplog.text
+    assert config_entry.runtime_data.history.public_incidents()[0]["ended"] is not None
