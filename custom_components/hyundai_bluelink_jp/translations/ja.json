@@ -9,9 +9,16 @@
           "password": "パスワード"
         }
       },
+      "reconfigure": {
+        "title": "パスワードを変更",
+        "description": "設定済みの Bluelink アカウントのパスワードを入力してください。",
+        "data": {
+          "password": "パスワード"
+        }
+      },
       "reauth_confirm": {
         "title": "再ログイン",
-        "description": "パスワードが受け付けられませんでした。このアカウントの今のパスワードを入力してください。",
+        "description": "公式 Bluelink のログイン画面に案内が表示された場合は、先にその手順を完了してください。その後、このアカウントの現在のパスワードを入力してください。",
         "data": {
           "password": "パスワード"
         }
@@ -19,13 +26,15 @@
     },
     "error": {
       "invalid_auth": "メールアドレスかパスワードが違います。",
+      "password_change_required": "公式 Bluelink のログイン画面でパスワード変更の案内を確認してから、再度お試しください。",
       "account_locked": "ログインの失敗が続いたため、アカウントが一時的にロックされています。時間をおいてから試してください。",
       "cannot_connect": "Hyundai Bluelink に接続できませんでした。",
       "no_vehicles": "このアカウントには車両が登録されていません。"
     },
     "abort": {
       "already_configured": "このアカウントは設定済みです。",
-      "reauth_successful": "再ログインしました。"
+      "reauth_successful": "再ログインしました。",
+      "reconfigure_successful": "パスワードを更新しました。"
     }
   },
   "entity": {

@@ -9,9 +9,16 @@
           "password": "Password"
         }
       },
+      "reconfigure": {
+        "title": "Change password",
+        "description": "Enter the password for the configured Bluelink account.",
+        "data": {
+          "password": "Password"
+        }
+      },
       "reauth_confirm": {
         "title": "Sign in again",
-        "description": "The password was not accepted. Enter the current password for this account.",
+        "description": "If the official Bluelink login screen shows instructions, complete them first. Then enter the current password for this account.",
         "data": {
           "password": "Password"
         }
@@ -19,13 +26,15 @@
     },
     "error": {
       "invalid_auth": "The email or password is incorrect.",
+      "password_change_required": "Check the password change prompt on the official Bluelink login screen, then try again.",
       "account_locked": "The account is temporarily locked after repeated failed sign-ins. Wait before trying again.",
       "cannot_connect": "Could not connect to Hyundai Bluelink.",
       "no_vehicles": "No vehicles are registered to this account."
     },
     "abort": {
       "already_configured": "This account is already configured.",
-      "reauth_successful": "Signed in again."
+      "reauth_successful": "Signed in again.",
+      "reconfigure_successful": "Password updated."
     }
   },
   "entity": {

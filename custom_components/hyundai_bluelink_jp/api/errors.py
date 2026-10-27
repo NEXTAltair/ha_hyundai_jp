@@ -30,6 +30,12 @@ class AuthenticationError(BluelinkError):
     reason = "invalid_auth"
 
 
+class PasswordChangeRequiredError(AuthenticationError):
+    """公式ログイン画面でパスワード変更の確認が必要。"""
+
+    reason = "password_change_required"
+
+
 class AccountLockedError(BluelinkError):
     """サインインの失敗が続き、アカウントが一時的にロックされた。"""
 
